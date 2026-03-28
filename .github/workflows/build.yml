@@ -1,0 +1,35 @@
+name: Build C++ Demuxer
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # 允许在 GitHub 网页上手动触发运行
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+      # 这个 action 会配置好 cl.exe 等编译工具的环境变量
+
+    - name: Compile C++ Source
+      run: |
+        # /EHsc: 启用 C++ 异常处理
+        # /O2: 优化代码速度
+        # /Fe: 指定输出的可执行文件名称
+        # 注意: 因为代码包含了 "clCRID.h", 假设你也有 "clCRID.cpp", 需要一起编译
+        cl.exe /EHsc /O2 Source.cpp clCRID.cpp /Fe:crid_demux.exe
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: crid_demux_windows
+        path: crid_demux.exe
+        # 编译成功后，可以在 GitHub Actions 页面下载生成的 .exe 文件
